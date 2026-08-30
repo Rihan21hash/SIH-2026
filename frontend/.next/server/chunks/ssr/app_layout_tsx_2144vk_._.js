@@ -1,0 +1,3 @@
+module.exports=[33290,a=>{"use strict";var b=a.i(7997);a.s(["default",0,function({children:a}){return(0,b.jsx)("html",{lang:"en",className:"dark",children:(0,b.jsx)("body",{className:"bg-[#0D1117] text-[#F0F6FC] antialiased min-h-screen",children:a})})},"metadata",0,{title:"AeroWatch — Weather Intelligence C2 Center",description:"AI-driven Operational Weather Intelligence Command & Control Center (SIH26078)"}])},70864,function(a){a.n(a.i(33290))}];
+
+//# sourceMappingURL=app_layout_tsx_2144vk_._.js.map

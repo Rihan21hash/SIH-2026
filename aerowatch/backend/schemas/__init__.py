@@ -1,1 +1,0 @@
-"""AeroWatch Schemas package"""

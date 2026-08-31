@@ -1,0 +1,120 @@
+{
+  "dataset": "AeroWatch SIH26078 Ground Truth Demo Scenarios",
+  "generated_at": "2026-08-31T04:15:00Z",
+  "events": [
+    {
+      "event_id": "AW-2024-001",
+      "hazard_type": "CYCLONE",
+      "severity": "SEVERE",
+      "risk_score": 87.0,
+      "confidence": 91.0,
+      "start_time": "2026-08-29T04:00:00Z",
+      "expected_duration_hours": 72,
+      "location": {
+        "lat": 13.08,
+        "lon": 80.27,
+        "state": "Tamil Nadu",
+        "district": "Chennai",
+        "region_name": "Bay of Bengal - NW Coast"
+      },
+      "affected_districts": ["Chennai", "Tiruvallur", "Kancheepuram", "Chengalpattu", "Villupuram"],
+      "affected_area_km2": 18200.0,
+      "movement_direction": "NNW",
+      "movement_speed_kmh": 18.0,
+      "growth_rate_pct": 12.0,
+      "forecast_lead_hours": 48,
+      "anomaly_drivers": {
+        "rainfall_anomaly_pct": 312.0,
+        "temperature_anomaly_c": 2.8,
+        "wind_anomaly_pct": 187.0,
+        "pressure_anomaly_hpa": -24.0,
+        "persistence_days": 2.0,
+        "spatial_growth_pct": 43.0
+      },
+      "timeline": [
+        { "timestep": "T0", "offset_hours": 0, "lat": 13.08, "lon": 80.27, "risk_score": 87.0, "severity": "SEVERE", "intensity_value": 74.0, "affected_area_km2": 18200.0 },
+        { "timestep": "T+12h", "offset_hours": 12, "lat": 13.31, "lon": 80.15, "risk_score": 92.0, "severity": "SEVERE", "intensity_value": 78.0, "affected_area_km2": 19500.0 },
+        { "timestep": "T+24h", "offset_hours": 24, "lat": 13.54, "lon": 80.03, "risk_score": 96.0, "severity": "SEVERE", "intensity_value": 82.0, "affected_area_km2": 21000.0 },
+        { "timestep": "T+36h", "offset_hours": 36, "lat": 13.77, "lon": 79.91, "risk_score": 98.0, "severity": "SEVERE", "intensity_value": 84.0, "affected_area_km2": 22400.0 },
+        { "timestep": "T+48h", "offset_hours": 48, "lat": 14.00, "lon": 79.79, "risk_score": 79.0, "severity": "HIGH", "intensity_value": 67.0, "affected_area_km2": 23500.0 },
+        { "timestep": "T+72h", "offset_hours": 72, "lat": 14.46, "lon": 79.55, "risk_score": 52.0, "severity": "ELEVATED", "intensity_value": 44.0, "affected_area_km2": 25000.0 }
+      ]
+    },
+    {
+      "event_id": "AW-2024-002",
+      "hazard_type": "HEATWAVE",
+      "severity": "HIGH",
+      "risk_score": 74.0,
+      "confidence": 88.0,
+      "start_time": "2026-08-27T04:00:00Z",
+      "expected_duration_hours": 120,
+      "location": {
+        "lat": 26.90,
+        "lon": 70.90,
+        "state": "Rajasthan",
+        "district": "Jaisalmer",
+        "region_name": "Thar Desert — Western Rajasthan"
+      },
+      "affected_districts": ["Jaisalmer", "Barmer", "Bikaner", "Jodhpur", "Nagaur"],
+      "affected_area_km2": 52000.0,
+      "movement_direction": "ENE",
+      "movement_speed_kmh": 8.0,
+      "growth_rate_pct": 6.0,
+      "forecast_lead_hours": 72,
+      "anomaly_drivers": {
+        "rainfall_anomaly_pct": -78.0,
+        "temperature_anomaly_c": 6.4,
+        "wind_anomaly_pct": 34.0,
+        "pressure_anomaly_hpa": -8.0,
+        "persistence_days": 4.0,
+        "spatial_growth_pct": 18.0
+      },
+      "timeline": [
+        { "timestep": "T0", "offset_hours": 0, "lat": 26.90, "lon": 70.90, "risk_score": 74.0, "severity": "HIGH", "intensity_value": 63.0, "affected_area_km2": 52000.0 },
+        { "timestep": "T+12h", "offset_hours": 12, "lat": 26.96, "lon": 71.02, "risk_score": 77.0, "severity": "HIGH", "intensity_value": 65.0, "affected_area_km2": 53500.0 },
+        { "timestep": "T+24h", "offset_hours": 24, "lat": 27.02, "lon": 71.14, "risk_score": 81.0, "severity": "SEVERE", "intensity_value": 69.0, "affected_area_km2": 55000.0 },
+        { "timestep": "T+36h", "offset_hours": 36, "lat": 27.08, "lon": 71.26, "risk_score": 83.0, "severity": "SEVERE", "intensity_value": 71.0, "affected_area_km2": 56200.0 },
+        { "timestep": "T+48h", "offset_hours": 48, "lat": 27.14, "lon": 71.38, "risk_score": 76.0, "severity": "HIGH", "intensity_value": 65.0, "affected_area_km2": 57000.0 },
+        { "timestep": "T+72h", "offset_hours": 72, "lat": 27.26, "lon": 71.62, "risk_score": 68.0, "severity": "HIGH", "intensity_value": 58.0, "affected_area_km2": 58500.0 }
+      ]
+    },
+    {
+      "event_id": "AW-2024-003",
+      "hazard_type": "FLOOD",
+      "severity": "HIGH",
+      "risk_score": 69.0,
+      "confidence": 84.0,
+      "start_time": "2026-08-30T04:00:00Z",
+      "expected_duration_hours": 96,
+      "location": {
+        "lat": 9.93,
+        "lon": 76.26,
+        "state": "Kerala",
+        "district": "Ernakulam",
+        "region_name": "Central Kerala — Periyar Basin"
+      },
+      "affected_districts": ["Ernakulam", "Thrissur", "Idukki", "Palakkad", "Malappuram"],
+      "affected_area_km2": 8700.0,
+      "movement_direction": "SW",
+      "movement_speed_kmh": 4.0,
+      "growth_rate_pct": 22.0,
+      "forecast_lead_hours": 36,
+      "anomaly_drivers": {
+        "rainfall_anomaly_pct": 248.0,
+        "temperature_anomaly_c": -1.2,
+        "wind_anomaly_pct": 56.0,
+        "pressure_anomaly_hpa": -12.0,
+        "persistence_days": 1.0,
+        "spatial_growth_pct": 31.0
+      },
+      "timeline": [
+        { "timestep": "T0", "offset_hours": 0, "lat": 9.93, "lon": 76.26, "risk_score": 69.0, "severity": "HIGH", "intensity_value": 58.0, "affected_area_km2": 8700.0 },
+        { "timestep": "T+12h", "offset_hours": 12, "lat": 9.87, "lon": 76.20, "risk_score": 75.0, "severity": "HIGH", "intensity_value": 63.0, "affected_area_km2": 9300.0 },
+        { "timestep": "T+24h", "offset_hours": 24, "lat": 9.81, "lon": 76.14, "risk_score": 79.0, "severity": "HIGH", "intensity_value": 67.0, "affected_area_km2": 10000.0 },
+        { "timestep": "T+36h", "offset_hours": 36, "lat": 9.75, "lon": 76.08, "risk_score": 77.0, "severity": "HIGH", "intensity_value": 65.0, "affected_area_km2": 10600.0 },
+        { "timestep": "T+48h", "offset_hours": 48, "lat": 9.69, "lon": 76.02, "risk_score": 64.0, "severity": "HIGH", "intensity_value": 54.0, "affected_area_km2": 11000.0 },
+        { "timestep": "T+72h", "offset_hours": 72, "lat": 9.57, "lon": 75.90, "risk_score": 45.0, "severity": "ELEVATED", "intensity_value": 38.0, "affected_area_km2": 11400.0 }
+      ]
+    }
+  ]
+}

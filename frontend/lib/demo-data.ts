@@ -1,0 +1,231 @@
+import type { WeatherEvent, SystemStatus, KPIData, DataMode, EventType, SeverityLevel, AnomalyDrivers, EventTimestep } from '@/types';
+
+// ─── Realistic demo dataset for SIH offline presentation ───────────────────
+
+const DEMO_TIMESTAMP = new Date().toISOString();
+
+function makeTimeline(baseLat: number, baseLon: number, baseRisk: number, dLat = 0.3, dLon = 0.2): EventTimestep[] {
+  const steps = ['T0', 'T+12h', 'T+24h', 'T+36h', 'T+48h', 'T+72h'];
+  const offsets = [0, 12, 24, 36, 48, 72];
+  return steps.map((step, i) => {
+    const riskMod = baseRisk + (i * 3) - (i > 3 ? (i - 3) * 8 : 0);
+    const risk = Math.max(10, Math.min(100, riskMod));
+    let severity: SeverityLevel = 'LOW';
+    if (risk > 80) severity = 'SEVERE';
+    else if (risk > 60) severity = 'HIGH';
+    else if (risk > 40) severity = 'ELEVATED';
+    else if (risk > 20) severity = 'MODERATE';
+    return {
+      timestep: step,
+      offset_hours: offsets[i],
+      lat: baseLat + dLat * i * 0.4,
+      lon: baseLon + dLon * i * 0.35,
+      risk_score: risk,
+      severity,
+      intensity_value: 20 + i * 8,
+      affected_area_km2: 2400 + i * 600,
+    };
+  });
+}
+
+export const DEMO_EVENTS: WeatherEvent[] = [
+  {
+    event_id: 'AW-2024-001',
+    hazard_type: 'CYCLONE' as EventType,
+    severity: 'SEVERE' as SeverityLevel,
+    risk_score: 87,
+    confidence: 91,
+    start_time: new Date(Date.now() - 86400000 * 2).toISOString(),
+    expected_duration_hours: 72,
+    location: {
+      lat: 13.08,
+      lon: 80.27,
+      state: 'Tamil Nadu',
+      district: 'Chennai',
+      region_name: 'Bay of Bengal - NW Coast',
+    },
+    affected_districts: ['Chennai', 'Tiruvallur', 'Kancheepuram', 'Chengalpattu', 'Villupuram'],
+    affected_area_km2: 18200,
+    movement_direction: 'NNW',
+    movement_speed_kmh: 18,
+    growth_rate_pct: 12,
+    forecast_lead_hours: 48,
+    anomaly_drivers: {
+      rainfall_anomaly_pct: 312,
+      temperature_anomaly_c: 2.8,
+      wind_anomaly_pct: 187,
+      pressure_anomaly_hpa: -24,
+      persistence_days: 2,
+      spatial_growth_pct: 43,
+    },
+    timeline: makeTimeline(13.08, 80.27, 87, 0.3, -0.15),
+  },
+  {
+    event_id: 'AW-2024-002',
+    hazard_type: 'HEATWAVE' as EventType,
+    severity: 'HIGH' as SeverityLevel,
+    risk_score: 74,
+    confidence: 88,
+    start_time: new Date(Date.now() - 86400000 * 4).toISOString(),
+    expected_duration_hours: 120,
+    location: {
+      lat: 26.9,
+      lon: 70.9,
+      state: 'Rajasthan',
+      district: 'Jaisalmer',
+      region_name: 'Thar Desert — Western Rajasthan',
+    },
+    affected_districts: ['Jaisalmer', 'Barmer', 'Bikaner', 'Jodhpur', 'Nagaur'],
+    affected_area_km2: 52000,
+    movement_direction: 'ENE',
+    movement_speed_kmh: 8,
+    growth_rate_pct: 6,
+    forecast_lead_hours: 72,
+    anomaly_drivers: {
+      rainfall_anomaly_pct: -78,
+      temperature_anomaly_c: 6.4,
+      wind_anomaly_pct: 34,
+      pressure_anomaly_hpa: -8,
+      persistence_days: 4,
+      spatial_growth_pct: 18,
+    },
+    timeline: makeTimeline(26.9, 70.9, 74, 0.05, 0.1),
+  },
+  {
+    event_id: 'AW-2024-003',
+    hazard_type: 'FLOOD' as EventType,
+    severity: 'HIGH' as SeverityLevel,
+    risk_score: 69,
+    confidence: 84,
+    start_time: new Date(Date.now() - 86400000 * 1).toISOString(),
+    expected_duration_hours: 96,
+    location: {
+      lat: 9.93,
+      lon: 76.26,
+      state: 'Kerala',
+      district: 'Ernakulam',
+      region_name: 'Central Kerala — Periyar Basin',
+    },
+    affected_districts: ['Ernakulam', 'Thrissur', 'Idukki', 'Palakkad', 'Malappuram'],
+    affected_area_km2: 8700,
+    movement_direction: 'SW',
+    movement_speed_kmh: 4,
+    growth_rate_pct: 22,
+    forecast_lead_hours: 36,
+    anomaly_drivers: {
+      rainfall_anomaly_pct: 248,
+      temperature_anomaly_c: -1.2,
+      wind_anomaly_pct: 56,
+      pressure_anomaly_hpa: -12,
+      persistence_days: 1,
+      spatial_growth_pct: 31,
+    },
+    timeline: makeTimeline(9.93, 76.26, 69, 0.1, -0.05),
+  },
+  {
+    event_id: 'AW-2024-004',
+    hazard_type: 'CLOUDBURST' as EventType,
+    severity: 'ELEVATED' as SeverityLevel,
+    risk_score: 54,
+    confidence: 72,
+    start_time: new Date(Date.now() - 3600000 * 8).toISOString(),
+    expected_duration_hours: 24,
+    location: {
+      lat: 30.32,
+      lon: 78.03,
+      state: 'Uttarakhand',
+      district: 'Chamoli',
+      region_name: 'Garhwal Himalayas — Upper Alaknanda',
+    },
+    affected_districts: ['Chamoli', 'Rudraprayag', 'Tehri Garhwal'],
+    affected_area_km2: 1800,
+    movement_direction: undefined,
+    movement_speed_kmh: 0,
+    growth_rate_pct: 8,
+    forecast_lead_hours: 12,
+    anomaly_drivers: {
+      rainfall_anomaly_pct: 178,
+      temperature_anomaly_c: -2.1,
+      wind_anomaly_pct: 92,
+      pressure_anomaly_hpa: -16,
+      persistence_days: 0,
+      spatial_growth_pct: 12,
+    },
+    timeline: makeTimeline(30.32, 78.03, 54, 0.02, 0.01),
+  },
+  {
+    event_id: 'AW-2024-005',
+    hazard_type: 'STORM' as EventType,
+    severity: 'ELEVATED' as SeverityLevel,
+    risk_score: 48,
+    confidence: 67,
+    start_time: new Date(Date.now() - 86400000 * 1.5).toISOString(),
+    expected_duration_hours: 48,
+    location: {
+      lat: 20.27,
+      lon: 85.84,
+      state: 'Odisha',
+      district: 'Puri',
+      region_name: 'Odisha Coast — Mahanadi Delta',
+    },
+    affected_districts: ['Puri', 'Khordha', 'Jagatsinghpur', 'Kendrapara', 'Cuttack'],
+    affected_area_km2: 6200,
+    movement_direction: 'W',
+    movement_speed_kmh: 22,
+    growth_rate_pct: 15,
+    forecast_lead_hours: 36,
+    anomaly_drivers: {
+      rainfall_anomaly_pct: 134,
+      temperature_anomaly_c: 1.8,
+      wind_anomaly_pct: 112,
+      pressure_anomaly_hpa: -9,
+      persistence_days: 1,
+      spatial_growth_pct: 24,
+    },
+    timeline: makeTimeline(20.27, 85.84, 48, 0.05, -0.2),
+  },
+  {
+    event_id: 'AW-2024-006',
+    hazard_type: 'HEATWAVE' as EventType,
+    severity: 'MODERATE' as SeverityLevel,
+    risk_score: 32,
+    confidence: 79,
+    start_time: new Date(Date.now() - 86400000 * 3).toISOString(),
+    expected_duration_hours: 96,
+    location: {
+      lat: 28.61,
+      lon: 77.21,
+      state: 'Delhi',
+      district: 'Central Delhi',
+      region_name: 'NCR — Delhi Urban Heat Island',
+    },
+    affected_districts: ['Central Delhi', 'North Delhi', 'East Delhi', 'South Delhi', 'Faridabad'],
+    affected_area_km2: 2500,
+    movement_direction: 'N',
+    movement_speed_kmh: 5,
+    growth_rate_pct: 3,
+    forecast_lead_hours: 48,
+    anomaly_drivers: {
+      rainfall_anomaly_pct: -62,
+      temperature_anomaly_c: 4.2,
+      wind_anomaly_pct: -18,
+      pressure_anomaly_hpa: -4,
+      persistence_days: 3,
+      spatial_growth_pct: 7,
+    },
+    timeline: makeTimeline(28.61, 77.21, 32, 0.01, 0.02),
+  },
+];
+
+export const DEMO_STATUS: SystemStatus = {
+  system_online: true,
+  data_mode: 'DEMO',
+  forecast_cycle: '00Z',
+  last_updated: DEMO_TIMESTAMP,
+  active_event_count: DEMO_EVENTS.length,
+  high_risk_count: DEMO_EVENTS.filter(e => e.risk_score >= 61).length,
+  severe_count: DEMO_EVENTS.filter(e => e.severity === 'SEVERE').length,
+  affected_districts_count: [...new Set(DEMO_EVENTS.flatMap(e => e.affected_districts))].length,
+  max_risk_score: Math.max(...DEMO_EVENTS.map(e => e.risk_score)),
+  forecast_lead_hours: 72,
+};

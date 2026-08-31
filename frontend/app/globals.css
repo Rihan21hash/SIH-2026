@@ -1,0 +1,298 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Geist:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+/* ─── CSS Custom Properties (AeroDark Intelligence) ─────────────────────── */
+:root {
+  --color-background:              #111318;
+  --color-surface:                 #111318;
+  --color-surface-container:       #1e2024;
+  --color-surface-container-high:  #282a2e;
+  --color-on-surface:              #e2e2e8;
+  --color-on-surface-variant:      #b9cacb;
+  --color-primary:                 #dbfcff;
+  --color-primary-container:       #00f0ff;
+  --color-primary-fixed-dim:       #00dbe9;
+  --color-secondary-container:     #7000ff;
+  --color-outline:                 #849495;
+  --color-outline-variant:         #3b494b;
+  --color-sev-severe:              #ff4444;
+  --color-sev-high:                #ff8800;
+  --color-sev-elevated:            #ffcc00;
+  --color-sev-moderate:            #44aaff;
+  --color-sev-low:                 #00dbe9;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background-color: #111318;
+  color: #e2e2e8;
+  font-family: 'Geist', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ─── Scanlines overlay (HUD aesthetic) ─────────────────────────────────── */
+.scanlines::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.04) 2px,
+    rgba(0, 0, 0, 0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ─── HUD Bracket corners ────────────────────────────────────────────────── */
+.hud-bracket {
+  position: relative;
+}
+.hud-bracket::before,
+.hud-bracket::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: rgba(0, 240, 255, 0.6);
+  border-style: solid;
+}
+.hud-bracket::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+.hud-bracket::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+.hud-bracket-full::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.hud-bracket-tr::before { top: -1px; right: -1px; left: auto; border-width: 2px 2px 0 0; }
+.hud-bracket-bl::before { bottom: -1px; left: -1px; top: auto; border-width: 0 0 2px 2px; }
+.hud-bracket-br::before { bottom: -1px; right: -1px; left: auto; top: auto; border-width: 0 2px 2px 0; }
+
+/* ─── Pulse animation for event markers ─────────────────────────────────── */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7); }
+  70%  { transform: scale(1);   box-shadow: 0 0 0 10px rgba(0, 240, 255, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 240, 255, 0); }
+}
+.pulse-marker {
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-red {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+  70%  { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+}
+.pulse-red { animation: pulse-red 1.5s infinite; }
+
+@keyframes pulse-amber {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 136, 0, 0.7); }
+  70%  { box-shadow: 0 0 0 10px rgba(255, 136, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 136, 0, 0); }
+}
+.pulse-amber { animation: pulse-amber 2s infinite; }
+
+/* ─── Neon glow utilities ────────────────────────────────────────────────── */
+.glow-cyan { text-shadow: 0 0 8px rgba(0, 240, 255, 0.7), 0 0 20px rgba(0, 240, 255, 0.3); }
+.glow-box-cyan { box-shadow: 0 0 10px rgba(0, 240, 255, 0.2), 0 0 1px rgba(0, 240, 255, 0.4) inset; }
+.glow-box-cyan-hover:hover { box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
+.glow-box-red   { box-shadow: 0 0 10px rgba(255, 68, 68, 0.3); }
+.glow-box-amber { box-shadow: 0 0 10px rgba(255, 136, 0, 0.3); }
+
+/* ─── Glassmorphism panels ───────────────────────────────────────────────── */
+.glass {
+  background: rgba(30, 32, 36, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.glass-high {
+  background: rgba(40, 42, 46, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 240, 255, 0.12);
+}
+.glass-surface {
+  background: rgba(17, 19, 24, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ─── Custom scrollbar ───────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #1a1c20; }
+::-webkit-scrollbar-thumb { background: #3b494b; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #00dbe9; }
+
+/* ─── Map container ──────────────────────────────────────────────────────── */
+.maplibregl-canvas { outline: none; }
+.maplibregl-ctrl-attrib { display: none !important; }
+.maplibregl-ctrl-logo { display: none !important; }
+
+/* ─── KPI card ───────────────────────────────────────────────────────────── */
+.kpi-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* ─── Data table rows ────────────────────────────────────────────────────── */
+.data-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(59, 73, 75, 0.4);
+  gap: 8px;
+}
+.data-row:last-child { border-bottom: none; }
+
+/* ─── Status chip ────────────────────────────────────────────────────────── */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+/* ─── Timeline scrubber ──────────────────────────────────────────────────── */
+input[type=range].timeline-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  width: 100%;
+  cursor: pointer;
+}
+input[type=range].timeline-range::-webkit-slider-track {
+  height: 2px;
+  background: #3b494b;
+  border-radius: 1px;
+}
+input[type=range].timeline-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00f0ff;
+  border: 2px solid #111318;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+  margin-top: -6px;
+}
+input[type=range].timeline-range::-moz-range-track {
+  height: 2px;
+  background: #3b494b;
+}
+input[type=range].timeline-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00f0ff;
+  border: 2px solid #111318;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+}
+
+/* ─── Anomaly bar ────────────────────────────────────────────────────────── */
+.anomaly-bar-track {
+  height: 3px;
+  background: rgba(59, 73, 75, 0.5);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.anomaly-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* ─── Button states ──────────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #00f0ff;
+  background: rgba(0, 240, 255, 0.08);
+  color: #00f0ff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  background: rgba(0, 240, 255, 0.15);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid rgba(59, 73, 75, 0.7);
+  background: transparent;
+  color: #b9cacb;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-ghost:hover {
+  border-color: #849495;
+  color: #e2e2e8;
+}
+
+/* ─── Nav active state ───────────────────────────────────────────────────── */
+.nav-active {
+  background: rgba(0, 240, 255, 0.08);
+  border-right: 3px solid #00f0ff;
+  color: #dbfcff;
+}
+.nav-item {
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+/* ─── Event list item ────────────────────────────────────────────────────── */
+.event-item-selected {
+  background: rgba(0, 240, 255, 0.07);
+  border-left: 2px solid #00f0ff;
+}
+
+/* ─── Loading animation ──────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #1e2024 25%, #282a2e 50%, #1e2024 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ─── Risk gauge ─────────────────────────────────────────────────────────── */
+.risk-bar { transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }

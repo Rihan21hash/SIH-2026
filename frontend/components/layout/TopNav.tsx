@@ -9,119 +9,130 @@ interface TopNavProps {
   dataMode: DataMode;
   onModeToggle: () => void;
   backendOnline: boolean;
+  onOpenGuide?: () => void;
+  onOpenAlerts?: () => void;
+  alertCount?: number;
 }
 
-export default function TopNav({ status, dataMode, onModeToggle, backendOnline }: TopNavProps) {
-  const [now, setNow] = useState(new Date());
+export default function TopNav({
+  status,
+  dataMode,
+  onModeToggle,
+  backendOnline,
+  onOpenGuide,
+  onOpenAlerts,
+  alertCount = 0,
+}: TopNavProps) {
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 30000);
-    return () => clearInterval(t);
+    setMounted(true);
   }, []);
 
-  const timeAgo = status?.last_updated ? formatTimeAgo(status.last_updated) : '—';
+  const timeAgo = status?.last_updated ? formatTimeAgo(status.last_updated) : 'Just now';
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 z-50 glass-surface border-b border-primary-container/20 flex items-center justify-between px-5"
-      style={{ boxShadow: '0 4px 30px rgba(0, 240, 255, 0.04)' }}>
-      
+    <header
+      suppressHydrationWarning
+      className="fixed top-0 left-0 right-0 h-16 z-50 bg-[#0d111a]/95 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-4 sm:px-6 shadow-xl"
+    >
       {/* Left — Logo + Status */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4 sm:gap-6">
         <div className="flex items-center gap-3">
           {/* Logo mark */}
-          <div className="w-8 h-8 rounded-sm flex items-center justify-center relative"
-            style={{ background: 'rgba(0, 240, 255, 0.1)', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M9 1L16 5.5V12.5L9 17L2 12.5V5.5L9 1Z" stroke="#00f0ff" strokeWidth="1.5" fill="none" />
-              <circle cx="9" cy="9" r="2.5" fill="#00f0ff" opacity="0.8" />
-              <line x1="9" y1="3" x2="9" y2="6" stroke="#00f0ff" strokeWidth="1" opacity="0.5" />
-            </svg>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-cyan-500/15 border border-cyan-400/40 shadow-md shadow-cyan-500/20 text-cyan-400 font-bold text-lg">
+            <i className="bi bi-tornado text-cyan-400 text-lg"></i>
           </div>
           <div>
-            <div className="font-mono font-bold text-primary tracking-tighter text-xl leading-none glow-cyan">
-              AeroWatch
+            <div className="font-bold text-white tracking-tight text-xl leading-none flex items-center gap-2">
+              <span>AeroWatch</span>
+              <span className="hidden sm:inline-block text-[10px] bg-cyan-500/20 text-cyan-300 font-mono px-2 py-0.5 rounded-full border border-cyan-500/30 font-semibold uppercase tracking-wider">
+                SIH26078
+              </span>
             </div>
-            <div className="font-mono text-[9px] text-on-surface-variant tracking-widest uppercase mt-0.5">
-              SIH26078 — Extreme Weather Intel
+            <div className="text-[11px] text-slate-400 font-medium mt-0.5 hidden sm:block">
+              Extreme Weather Intelligence Command Center
             </div>
           </div>
         </div>
 
-        {/* Status chips */}
-        <div className="hidden lg:flex items-center gap-2">
-          <div className="status-chip" style={{
-            borderColor: backendOnline ? 'rgba(0, 219, 233, 0.5)' : 'rgba(255, 68, 68, 0.5)',
-            color: backendOnline ? '#00dbe9' : '#ff4444',
-            background: backendOnline ? 'rgba(0, 219, 233, 0.08)' : 'rgba(255, 68, 68, 0.08)',
-          }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{
-              background: backendOnline ? '#00dbe9' : '#ff4444'
-            }} />
-            {backendOnline ? 'SYS ONLINE' : 'SYS OFFLINE'}
+        {/* Status indicators */}
+        <div className="hidden xl:flex items-center gap-2 text-xs">
+          {/* System Online / Offline */}
+          <div
+            className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 font-semibold text-xs border ${
+              backendOnline
+                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                backendOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+              }`}
+            />
+            <span>{backendOnline ? 'Backend Online' : 'Simulation Mode'}</span>
           </div>
-          <div className="status-chip border-outline-variant text-on-surface-variant">
-            CYCLE: {status?.forecast_cycle ?? '00Z'}
+
+          {/* Data Mode */}
+          <div
+            className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 font-semibold text-xs border ${
+              dataMode === 'LIVE'
+                ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                : 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
+            }`}
+          >
+            <i className={dataMode === 'LIVE' ? 'bi bi-broadcast text-cyan-300' : 'bi bi-cpu text-indigo-300'}></i>
+            <span>{dataMode === 'LIVE' ? 'Live Meteorological Feed' : 'Demo Scenarios'}</span>
           </div>
-          <div className="status-chip" style={{
-            borderColor: dataMode === 'LIVE' ? 'rgba(0, 219, 233, 0.5)' : 'rgba(255, 136, 0, 0.5)',
-            color: dataMode === 'LIVE' ? '#00dbe9' : '#ff8800',
-            background: dataMode === 'LIVE' ? 'rgba(0, 219, 233, 0.08)' : 'rgba(255, 136, 0, 0.08)',
-          }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{
-              background: dataMode === 'LIVE' ? '#00dbe9' : '#ff8800'
-            }} />
-            {dataMode}
-          </div>
-          <div className="status-chip border-outline-variant text-on-surface-variant">
-            UPD: {timeAgo}
-          </div>
+
+          {/* Last Update */}
+          {mounted && (
+            <div className="text-slate-400 text-xs bg-slate-800/60 px-2.5 py-1 rounded-full border border-slate-700/60">
+              Synced: <span className="text-slate-200 font-medium">{timeAgo}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Center — Nav */}
-      <nav className="hidden md:flex items-center gap-1">
-        {[
-          { label: 'Live Tracking', active: true },
-          { label: 'Historical', active: false },
-          { label: 'Risk Analysis', active: false },
-          { label: 'Alerts', active: false },
-        ].map(({ label, active }) => (
-          <a key={label} href="#"
-            className={`px-3 py-1 font-mono text-[11px] font-medium tracking-wider uppercase transition-all duration-150 rounded-sm ${
-              active
-                ? 'text-primary-container bg-primary-container/10 border border-primary-container/30'
-                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border border-transparent'
-            }`}>
-            {label}
-          </a>
-        ))}
-      </nav>
+      {/* Right — Actions & Guides */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Quick Guide / Help Button */}
+        <button
+          onClick={onOpenGuide}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-400/40 text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+          title="Open first-time guide and scientific methodology"
+        >
+          <i className="bi bi-book-half"></i>
+          <span className="hidden sm:inline">Quick Guide</span>
+        </button>
 
-      {/* Right — Actions */}
-      <div className="flex items-center gap-3">
-        {/* Mode toggle */}
-        <button onClick={onModeToggle} className="btn-ghost text-[10px]">
-          <span className="material-symbols-outlined text-sm leading-none">
-            {dataMode === 'LIVE' ? 'cloud_off' : 'cloud'}
+        {/* Alerts Notification Button */}
+        <button
+          onClick={onOpenAlerts}
+          className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/40 text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+          title="View active weather alerts"
+        >
+          <i className="bi bi-bell-fill"></i>
+          <span className="hidden sm:inline">Alerts</span>
+          {alertCount > 0 && (
+            <span className="w-5 h-5 rounded-full bg-red-500 text-white font-bold text-[10px] flex items-center justify-center shadow-md">
+              {alertCount}
+            </span>
+          )}
+        </button>
+
+        {/* Live / Demo Mode Toggle */}
+        <button
+          onClick={onModeToggle}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-all cursor-pointer"
+          title="Switch between Live Open-Meteo data and offline Demo scenarios"
+        >
+          <i className={dataMode === 'LIVE' ? 'bi bi-cpu' : 'bi bi-broadcast'}></i>
+          <span className="hidden md:inline">
+            {dataMode === 'LIVE' ? 'Switch to Demo' : 'Switch to Live'}
           </span>
-          {dataMode === 'LIVE' ? 'Demo Mode' : 'Live Mode'}
         </button>
-
-        {/* Deploy alert button */}
-        <button className="btn-primary hidden sm:flex">
-          <span className="material-symbols-outlined text-sm leading-none">warning</span>
-          Deploy Alert
-        </button>
-
-        {/* Icon actions */}
-        <div className="flex items-center gap-1">
-          {['notifications', 'settings', 'account_circle'].map(icon => (
-            <button key={icon}
-              className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary-container hover:bg-primary-container/10 rounded-sm transition-all duration-150">
-              <span className="material-symbols-outlined text-[20px]">{icon}</span>
-            </button>
-          ))}
-        </div>
       </div>
     </header>
   );

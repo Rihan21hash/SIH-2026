@@ -70,11 +70,11 @@ ml/training/logs/
 ml/training/runs/
 ml/evaluation/outputs/
 
-# Datasets (usually too large / shouldn't be versioned)
+# Datasets (large generated files — project demo data & boundaries are tracked)
 *.npy
 *.npz
-data/
-datasets/
+data/processed/
+data/raw/
 
 # Experiment tracking
 wandb/

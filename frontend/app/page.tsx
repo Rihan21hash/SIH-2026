@@ -12,16 +12,18 @@ import KPICard from '@/components/dashboard/KPICard';
 import EventList from '@/components/events/EventList';
 import EventPanel from '@/components/events/EventPanel';
 import ForecastTimeline from '@/components/timeline/ForecastTimeline';
+import WelcomeGuide from '@/components/onboarding/WelcomeGuide';
+import AlertsModal from '@/components/alerts/AlertsModal';
 
 // Dynamic import for MapLibre (no SSR)
 const IndiaMap = dynamic(() => import('@/components/map/IndiaMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 rounded-sm border-2 border-primary-container/40 border-t-primary-container animate-spin" />
-        <p className="font-mono text-[11px] text-on-surface-variant tracking-widest uppercase animate-pulse">
-          Loading Map...
+    <div className="w-full h-full flex items-center justify-center bg-[#0d1117]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 rounded-full border-3 border-cyan-400/40 border-t-cyan-400 animate-spin" />
+        <p className="font-sans text-xs text-cyan-300 font-semibold tracking-wide animate-pulse">
+          Initializing Satellite Earth Map & Grids...
         </p>
       </div>
     </div>
@@ -30,7 +32,6 @@ const IndiaMap = dynamic(() => import('@/components/map/IndiaMap'), {
 
 const AnomalyChart = dynamic(() => import('@/components/charts/AnomalyChart'), { ssr: false });
 
-// Refresh interval
 const REFRESH_INTERVAL = 60000; // 60s
 
 export default function CommandCenter() {
@@ -43,6 +44,23 @@ export default function CommandCenter() {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [backendOnline, setBackendOnline] = useState(false);
   const [modeBanner, setModeBanner] = useState<string | null>(null);
+
+  // Modals for Onboarding & Alerts
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+
+  // Check first-time user for guide popup
+  useEffect(() => {
+    try {
+      const seen = localStorage.getItem('aerowatch_guide_viewed');
+      if (!seen) {
+        setIsGuideOpen(true);
+        localStorage.setItem('aerowatch_guide_viewed', 'true');
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, []);
 
   // Load data
   const loadData = useCallback(async (forceMode?: DataMode) => {
@@ -57,8 +75,8 @@ export default function CommandCenter() {
     setStatus(actualMode === 'DEMO' ? { ...DEMO_STATUS, data_mode: 'DEMO' } : stRes.data);
 
     if (evRes.mode === 'DEMO' && !forceMode) {
-      setModeBanner('LIVE DATA UNAVAILABLE — Switched to DEMO MODE');
-      setTimeout(() => setModeBanner(null), 5000);
+      setModeBanner('Live server connecting — loaded validated demo scenarios');
+      setTimeout(() => setModeBanner(null), 4000);
     }
 
     setLoadingEvents(false);
@@ -71,6 +89,23 @@ export default function CommandCenter() {
     return () => clearInterval(interval);
   }, [loadData]);
 
+  // Keyboard navigation shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsGuideOpen(false);
+        setIsAlertsOpen(false);
+        setSelectedId(null);
+      } else if (e.key === 'ArrowRight') {
+        setTimeStepIndex(prev => Math.min(5, prev + 1));
+      } else if (e.key === 'ArrowLeft') {
+        setTimeStepIndex(prev => Math.max(0, prev - 1));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   function handleModeToggle() {
     const newMode: DataMode = dataMode === 'LIVE' ? 'DEMO' : 'LIVE';
     setLoadingEvents(true);
@@ -80,7 +115,7 @@ export default function CommandCenter() {
 
   const selectedEvent = events.find(e => e.event_id === selectedId) ?? null;
 
-  // KPI data
+  // KPI calculations
   const kpi: KPIData = status
     ? {
         active_events: status.active_event_count,
@@ -90,106 +125,139 @@ export default function CommandCenter() {
         max_risk: status.max_risk_score,
         forecast_lead_hours: status.forecast_lead_hours,
       }
-    : { active_events: 0, high_risk_events: 0, severe_events: 0, affected_districts: 0, max_risk: 0, forecast_lead_hours: 0 };
+    : {
+        active_events: events.length,
+        high_risk_events: events.filter(e => e.risk_score >= 60).length,
+        severe_events: events.filter(e => e.severity === 'SEVERE').length,
+        affected_districts: 18,
+        max_risk: Math.max(...events.map(e => e.risk_score), 0),
+        forecast_lead_hours: 72,
+      };
 
   const handleSetTimeStep = useCallback((v: number | ((prev: number) => number)) => {
     setTimeStepIndex(typeof v === 'function' ? v : () => v);
   }, []);
 
+  const urgentAlertCount = events.filter(e => e.severity === 'SEVERE' || e.severity === 'HIGH').length;
+
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
-      {/* Top nav */}
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#0d1117] text-slate-100 font-sans">
+      {/* Top Navigation */}
       <TopNav
         status={status}
         dataMode={dataMode}
         onModeToggle={handleModeToggle}
         backendOnline={backendOnline}
+        onOpenGuide={() => setIsGuideOpen(true)}
+        onOpenAlerts={() => setIsAlertsOpen(true)}
+        alertCount={urgentAlertCount}
       />
 
-      {/* Mode banner */}
+      {/* Interactive Onboarding Guide Modal */}
+      <WelcomeGuide
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+      />
+
+      {/* Real-time Alerts Modal */}
+      <AlertsModal
+        isOpen={isAlertsOpen}
+        onClose={() => setIsAlertsOpen(false)}
+        events={events}
+        onSelectEvent={(id) => {
+          setSelectedId(id);
+          setIsAlertsOpen(false);
+        }}
+      />
+
+      {/* Notification Banner */}
       {modeBanner && (
-        <div className="fixed top-16 left-0 right-0 z-40 flex items-center justify-center py-2 text-center"
-          style={{ background: 'rgba(255,136,0,0.15)', borderBottom: '1px solid rgba(255,136,0,0.3)' }}>
-          <span className="material-symbols-outlined text-[16px] mr-2" style={{ color: '#ff8800' }}>warning</span>
-          <span className="font-mono text-[11px] font-medium tracking-wider uppercase" style={{ color: '#ff8800' }}>
-            {modeBanner}
-          </span>
+        <div className="fixed top-16 left-0 right-0 z-40 flex items-center justify-center py-2 px-4 text-center bg-cyan-950/80 border-b border-cyan-500/30 text-cyan-300 text-xs font-semibold backdrop-blur-md">
+          <i className="bi bi-info-circle-fill text-cyan-400 mr-2"></i>
+          <span>{modeBanner}</span>
         </div>
       )}
 
-      {/* Main layout */}
+      {/* Main Layout Area */}
       <div className="flex flex-1 overflow-hidden pt-16">
-        {/* Side nav */}
-        <SideNav activeItem="map" />
+        {/* Left Vertical Side Navigation */}
+        <SideNav
+          activeItem="map"
+          onOpenGuide={() => setIsGuideOpen(true)}
+          onOpenAlerts={() => setIsAlertsOpen(true)}
+        />
 
-        {/* Content area */}
+        {/* Primary Content Window */}
         <div className="flex flex-1 flex-col overflow-hidden ml-[72px]">
-
-          {/* KPI Strip */}
-          <div className="flex-shrink-0 px-4 py-3 border-b border-outline-variant/20 bg-surface-container-lowest/40">
-            <div className="grid grid-cols-6 gap-2">
+          {/* Top KPI Telemetry Strip */}
+          <div className="flex-shrink-0 px-4 py-2.5 border-b border-slate-800 bg-[#0d121c]/80 backdrop-blur-md">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
               <KPICard
-                label="Active Events"
+                label="Active Weather Targets"
                 value={kpi.active_events}
                 severity="info"
-                icon="cyclone"
+                icon="radar"
+                subtext="tracked across India"
                 loading={loadingStatus}
               />
               <KPICard
-                label="High Risk"
+                label="High Risk Zones"
                 value={kpi.high_risk_events}
                 severity={kpi.high_risk_events > 0 ? 'warning' : 'normal'}
                 icon="warning"
+                subtext="risk score 60 to 80"
                 loading={loadingStatus}
               />
               <KPICard
-                label="Severe Events"
+                label="Severe Emergencies"
                 value={kpi.severe_events}
                 severity={kpi.severe_events > 0 ? 'danger' : 'normal'}
                 icon="emergency"
+                subtext="risk score > 80"
                 loading={loadingStatus}
               />
               <KPICard
-                label="Districts Affected"
+                label="Districts Monitored"
                 value={kpi.affected_districts}
                 severity="normal"
                 icon="location_on"
-                subtext="across India"
+                subtext="under active watch"
                 loading={loadingStatus}
               />
               <KPICard
-                label="Max Risk Score"
+                label="Peak Risk Level"
                 value={kpi.max_risk}
                 unit="/100"
                 severity={kpi.max_risk > 80 ? 'danger' : kpi.max_risk > 60 ? 'warning' : kpi.max_risk > 40 ? 'info' : 'normal'}
-                icon="bar_chart"
+                icon="speed"
+                subtext="highest anomaly index"
                 loading={loadingStatus}
               />
               <KPICard
-                label="Forecast Lead"
+                label="Forecast Lead Time"
                 value={kpi.forecast_lead_hours}
                 unit="h"
                 severity="normal"
                 icon="schedule"
-                subtext="medium-range"
+                subtext="medium-range interval"
                 loading={loadingStatus}
               />
             </div>
           </div>
 
-          {/* Command center — map + panels */}
+          {/* Core Command Dashboard: Events List + Radar Map + Event Intelligence */}
           <div className="flex flex-1 overflow-hidden">
-
-            {/* LEFT — Event List */}
-            <div className="w-64 flex-shrink-0 flex flex-col border-r border-outline-variant/20 bg-surface-container-lowest/30">
-              <div className="px-3 py-2 border-b border-outline-variant/20 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[14px] text-primary-container">list</span>
-                <span className="font-mono text-[11px] font-medium tracking-widest uppercase text-on-surface-variant">
-                  Active Events
-                </span>
-                <span className="ml-auto font-mono text-[10px] px-1.5 py-0.5 rounded-sm"
-                  style={{ background: 'rgba(0,240,255,0.1)', color: '#00dbe9', border: '1px solid rgba(0,240,255,0.2)' }}>
-                  {events.length}
+            {/* LEFT: Searchable Active Events List */}
+            <div className="w-72 sm:w-80 flex-shrink-0 flex flex-col border-r border-slate-800 bg-[#0f131d]">
+              <div className="px-4 py-2.5 border-b border-slate-800 flex items-center justify-between bg-[#121624]">
+                <div className="flex items-center gap-2">
+                  <i className="bi bi-card-checklist text-cyan-400 font-bold text-sm"></i>
+                  <span className="font-bold text-xs uppercase tracking-wider text-slate-200">
+                    Active Events
+                  </span>
+                </div>
+                <span className="text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-500/30">
+                  {events.length} Live
                 </span>
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -202,33 +270,9 @@ export default function CommandCenter() {
               </div>
             </div>
 
-            {/* CENTER — Map */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Map area */}
+            {/* CENTER: Google Earth & Radar Map + Timeline Scrubber */}
+            <div className="flex-1 flex flex-col overflow-hidden relative">
               <div className="flex-1 relative overflow-hidden">
-                {/* Map header overlay */}
-                <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-2 pointer-events-none"
-                  style={{ background: 'linear-gradient(to bottom, rgba(17,19,24,0.8), transparent)' }}>
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-[10px] text-on-surface-variant tracking-widest uppercase">
-                      India — Operational Weather Map
-                    </span>
-                    <span className="status-chip border-outline-variant/50 text-on-surface-variant">
-                      {events.length} anomalies detected
-                    </span>
-                  </div>
-                  <div className="status-chip" style={{
-                    borderColor: dataMode === 'LIVE' ? 'rgba(0,219,233,0.5)' : 'rgba(255,136,0,0.5)',
-                    color: dataMode === 'LIVE' ? '#00dbe9' : '#ff8800',
-                    background: dataMode === 'LIVE' ? 'rgba(0,219,233,0.08)' : 'rgba(255,136,0,0.08)',
-                  }}>
-                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{
-                      background: dataMode === 'LIVE' ? '#00dbe9' : '#ff8800'
-                    }} />
-                    {dataMode}
-                  </div>
-                </div>
-
                 <IndiaMap
                   events={events}
                   selectedId={selectedId}
@@ -237,8 +281,8 @@ export default function CommandCenter() {
                 />
               </div>
 
-              {/* Timeline strip */}
-              <div className="flex-shrink-0 border-t border-outline-variant/20 bg-surface-container-lowest/50">
+              {/* 72-Hour Medium Range Forecast Scrubber */}
+              <div className="flex-shrink-0">
                 <ForecastTimeline
                   timeStepIndex={timeStepIndex}
                   onChange={handleSetTimeStep}
@@ -246,21 +290,30 @@ export default function CommandCenter() {
               </div>
             </div>
 
-            {/* RIGHT — Event Intelligence Panel */}
-            <div className="w-72 flex-shrink-0 flex flex-col border-l border-outline-variant/20 bg-surface-container-lowest/30">
-              <div className="px-3 py-2 border-b border-outline-variant/20 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[14px] text-primary-container">radar</span>
-                <span className="font-mono text-[11px] font-medium tracking-widest uppercase text-on-surface-variant">
-                  Event Intelligence
-                </span>
+            {/* RIGHT: Detailed Event Intelligence & NDMA Action Panel */}
+            <div className="w-80 sm:w-96 flex-shrink-0 flex flex-col border-l border-slate-800 bg-[#0f131d]">
+              <div className="px-4 py-2.5 border-b border-slate-800 flex items-center justify-between bg-[#121624]">
+                <div className="flex items-center gap-2">
+                  <i className="bi bi-activity text-cyan-400 font-bold text-sm"></i>
+                  <span className="font-bold text-xs uppercase tracking-wider text-slate-200">
+                    Event Intelligence
+                  </span>
+                </div>
+                {selectedEvent && (
+                  <span className="text-[11px] font-mono text-slate-400 font-semibold">
+                    {selectedEvent.event_id}
+                  </span>
+                )}
               </div>
 
               <div className="flex-1 overflow-hidden flex flex-col">
-                <EventPanel event={selectedEvent} loading={loadingEvents && !selectedEvent} />
+                <div className="flex-1 overflow-y-auto">
+                  <EventPanel event={selectedEvent} loading={loadingEvents && !selectedEvent} />
+                </div>
 
-                {/* Chart — only when event selected */}
+                {/* Trajectory Risk Chart */}
                 {selectedEvent && (
-                  <div className="flex-shrink-0 px-4 py-3 border-t border-outline-variant/20">
+                  <div className="flex-shrink-0 p-3 border-t border-slate-800 bg-[#0d111a]">
                     <AnomalyChart event={selectedEvent} />
                   </div>
                 )}

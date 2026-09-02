@@ -5,7 +5,7 @@ Tracks extreme weather phenomena across multi-step medium-range forecasts
 and decay.
 """
 from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from backend.models.schemas import EventTimestep, SeverityLevel, EventType
 from backend.config import SEVERITY_CONFIG
 

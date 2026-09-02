@@ -2009,8 +2009,9 @@ class MapGenerator {
     toUrl(path) {
         let cached = this.memoizedURLs.get(path);
         if (cached) return cached;
-        if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
-        ;
+        if ("TURBOPACK compile-time truthy", 1) {
+            path = path.replace(/\\/g, '/');
+        }
         let url = encodeURI(path).replace(/[#?]/g, encodeURIComponent);
         this.memoizedURLs.set(path, url);
         return url;

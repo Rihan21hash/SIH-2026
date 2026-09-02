@@ -2,67 +2,56 @@
 
 interface SideNavProps {
   activeItem?: string;
+  onOpenGuide?: () => void;
+  onOpenAlerts?: () => void;
 }
 
-const NAV_ITEMS = [
-  { id: 'map',      icon: 'map',            label: 'Map' },
-  { id: 'events',   icon: 'cyclone',        label: 'Events' },
-  { id: 'alerts',   icon: 'notification_important', label: 'Alerts' },
-  { id: 'analysis', icon: 'analytics',      label: 'Analysis' },
-  { id: 'timeline', icon: 'schedule',       label: 'Timeline' },
-];
-
-const BOTTOM_ITEMS = [
-  { id: 'settings', icon: 'settings',  label: 'Settings' },
-  { id: 'help',     icon: 'help',      label: 'Help' },
-];
-
-export default function SideNav({ activeItem = 'map' }: SideNavProps) {
+export default function SideNav({ activeItem = 'map', onOpenGuide, onOpenAlerts }: SideNavProps) {
   return (
-    <aside className="fixed top-16 left-0 h-[calc(100vh-64px)] z-40 w-[72px] flex flex-col items-center justify-between py-3
-      bg-surface-container-lowest/70 backdrop-blur-xl border-r border-white/[0.06]">
-      
+    <aside className="fixed top-16 left-0 h-[calc(100vh-64px)] z-40 w-[72px] flex flex-col items-center justify-between py-3 bg-[#0d111a] border-r border-slate-800">
       {/* Top items */}
-      <div className="flex flex-col items-center gap-1 w-full">
-        {NAV_ITEMS.map(({ id, icon, label }) => {
-          const isActive = id === activeItem;
-          return (
-            <a key={id} href="#"
-              className={`nav-item w-full flex flex-col items-center justify-center py-3.5 gap-1 relative
-                ${isActive
-                  ? 'nav-active'
-                  : 'text-on-surface-variant opacity-70 hover:opacity-100 hover:bg-surface-container-high/40 border-r-3 border-transparent'
-                }`}>
-              <span className={`material-symbols-outlined text-[22px] ${isActive ? 'glow-cyan' : ''}`}
-                style={{ color: isActive ? '#00f0ff' : undefined }}>
-                {icon}
-              </span>
-              <span className="font-mono text-[9px] font-medium tracking-wider uppercase"
-                style={{ color: isActive ? '#00dbe9' : undefined }}>
-                {label}
-              </span>
-              {isActive && (
-                <div className="absolute right-0 top-0 bottom-0 w-0.5 rounded-l-full"
-                  style={{ background: 'linear-gradient(to bottom, transparent, #00f0ff, transparent)' }} />
-              )}
-            </a>
-          );
-        })}
+      <div className="flex flex-col items-center gap-1.5 w-full">
+        {/* Map */}
+        <button
+          className="w-full flex flex-col items-center justify-center py-3 gap-1 relative bg-cyan-500/10 border-r-2 border-cyan-400 text-cyan-300 cursor-pointer"
+          title="Live Operational Map"
+        >
+          <span className="material-symbols-outlined text-[24px] text-cyan-400">map</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">Map</span>
+        </button>
+
+        {/* Alerts */}
+        <button
+          onClick={onOpenAlerts}
+          className="w-full flex flex-col items-center justify-center py-3 gap-1 relative text-slate-400 hover:text-red-400 hover:bg-slate-800/50 transition-all cursor-pointer"
+          title="Active Meteorological Alerts"
+        >
+          <span className="material-symbols-outlined text-[24px]">notification_important</span>
+          <span className="text-[10px] font-medium uppercase tracking-wider">Alerts</span>
+        </button>
+
+        {/* Scientific Analysis */}
+        <button
+          onClick={onOpenGuide}
+          className="w-full flex flex-col items-center justify-center py-3 gap-1 relative text-slate-400 hover:text-cyan-300 hover:bg-slate-800/50 transition-all cursor-pointer"
+          title="Mathematical & ML Methodology"
+        >
+          <span className="material-symbols-outlined text-[24px]">analytics</span>
+          <span className="text-[10px] font-medium uppercase tracking-wider">Method</span>
+        </button>
       </div>
 
-      {/* Divider */}
-      <div className="w-8 h-px bg-outline-variant/50 my-2" />
-
       {/* Bottom items */}
-      <div className="flex flex-col items-center gap-1 w-full">
-        {BOTTOM_ITEMS.map(({ id, icon, label }) => (
-          <a key={id} href="#"
-            className="nav-item w-full flex flex-col items-center justify-center py-3 gap-1
-              text-on-surface-variant opacity-50 hover:opacity-80 hover:bg-surface-container-high/40">
-            <span className="material-symbols-outlined text-[20px]">{icon}</span>
-            <span className="font-mono text-[9px] tracking-wider uppercase">{label}</span>
-          </a>
-        ))}
+      <div className="flex flex-col items-center gap-1 w-full border-t border-slate-800/80 pt-3">
+        {/* Help & Guide */}
+        <button
+          onClick={onOpenGuide}
+          className="w-full flex flex-col items-center justify-center py-2.5 gap-1 text-slate-400 hover:text-cyan-300 hover:bg-slate-800/50 transition-all cursor-pointer"
+          title="Help & User Manual"
+        >
+          <span className="material-symbols-outlined text-[22px]">help</span>
+          <span className="text-[10px] font-medium uppercase tracking-wider">Guide</span>
+        </button>
       </div>
     </aside>
   );

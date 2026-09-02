@@ -124,7 +124,7 @@ function createAppPageEntrypoint({ tree, page, pathname, require: __next_app_req
         userland: {
             loaderTree: tree
         },
-        distDir: ("TURBOPACK compile-time value", ".next/dev") || '',
+        distDir: ("TURBOPACK compile-time value", ".next\\dev") || '',
         relativeProjectDir: ("TURBOPACK compile-time value", "") || ''
     });
     let srcPage = page;

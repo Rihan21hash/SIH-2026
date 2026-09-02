@@ -22,39 +22,6 @@
       }
     }
   },
-  "/dashboard/analysis": {
-    "hints": 64,
-    "slots": {
-      "children": {
-        "hints": 96,
-        "slots": {
-          "children": {
-            "hints": 96,
-            "slots": {
-              "children": {
-                "hints": 160,
-                "slots": null
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "/dashboard": {
-    "hints": 64,
-    "slots": {
-      "children": {
-        "hints": 96,
-        "slots": {
-          "children": {
-            "hints": 160,
-            "slots": null
-          }
-        }
-      }
-    }
-  },
   "/": {
     "hints": 64,
     "slots": {

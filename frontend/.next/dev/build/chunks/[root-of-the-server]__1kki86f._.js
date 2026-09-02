@@ -174,10 +174,10 @@ const toPath = (file)=>{
     if ((0, __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["isAbsolute"])(relPath)) {
         throw new Error(`Cannot depend on path (${file}) outside of root directory (${contextDir})`);
     }
-    return ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : relPath;
+    return ("TURBOPACK compile-time truthy", 1) ? relPath.replaceAll(__TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["sep"], '/') : "TURBOPACK unreachable";
 };
 const fromPath = (path)=>{
-    return (0, __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["join"])(/* turbopackIgnore: true */ contextDir, ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : path);
+    return (0, __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["join"])(/* turbopackIgnore: true */ contextDir, ("TURBOPACK compile-time truthy", 1) ? path.replaceAll('/', __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["sep"]) : "TURBOPACK unreachable");
 };
 // Patch process.env to track which env vars are read
 const originalEnv = process.env;

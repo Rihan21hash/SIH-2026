@@ -21,16 +21,7 @@
     "afterFiles": [],
     "fallback": []
   },
-  "dynamicRoutes": [
-    {
-      "page": "/dashboard/events/[id]",
-      "regex": "^/dashboard/events/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPid": "nxtPid"
-      },
-      "namedRegex": "^/dashboard/events/(?<nxtPid>[^/]+?)(?:/)?$"
-    }
-  ],
+  "dynamicRoutes": [],
   "staticRoutes": [
     {
       "page": "/",
@@ -49,36 +40,6 @@
       "regex": "^/_not\\-found(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/_not\\-found(?:/)?$"
-    },
-    {
-      "page": "/api/alerts",
-      "regex": "^/api/alerts(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/alerts(?:/)?$"
-    },
-    {
-      "page": "/api/events",
-      "regex": "^/api/events(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/events(?:/)?$"
-    },
-    {
-      "page": "/api/risk",
-      "regex": "^/api/risk(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/risk(?:/)?$"
-    },
-    {
-      "page": "/dashboard",
-      "regex": "^/dashboard(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/dashboard(?:/)?$"
-    },
-    {
-      "page": "/dashboard/analysis",
-      "regex": "^/dashboard/analysis(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/dashboard/analysis(?:/)?$"
     },
     {
       "page": "/favicon.ico",

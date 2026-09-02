@@ -105,7 +105,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "/Users/rajwardhansandippatil/Desktop/SIH/aerowatch/frontend",
+    "outputFileTracingRoot": "D:\\Hackathon\\SIH-2026\\frontend",
     "enablePrerenderSourceMaps": true,
     "cacheComponents": false,
     "cacheLife": {
@@ -175,7 +175,7 @@
       "proxyPrefetch": "flexible",
       "optimisticClientCache": true,
       "manualClientBasePath": false,
-      "cpus": 9,
+      "cpus": 15,
       "memoryBasedWorkersCount": false,
       "imgOptConcurrency": null,
       "imgOptOperationCache": null,
@@ -320,32 +320,32 @@
     "htmlLimitedBots": "[\\w-]+-Google|Google-[\\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight",
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.ts",
-    "repoRoot": "/Users/rajwardhansandippatil/Desktop/SIH/aerowatch/frontend",
+    "repoRoot": "D:\\Hackathon\\SIH-2026\\frontend",
     "turbopack": {
-      "root": "/Users/rajwardhansandippatil/Desktop/SIH/aerowatch/frontend"
+      "root": "D:\\Hackathon\\SIH-2026\\frontend"
     },
     "distDirRoot": ".next"
   },
-  "appDir": "/Users/rajwardhansandippatil/Desktop/SIH/aerowatch/frontend",
+  "appDir": "D:\\Hackathon\\SIH-2026\\frontend",
   "relativeAppDir": "",
   "files": [
-    ".next/package.json",
-    ".next/routes-manifest.json",
-    ".next/server/pages-manifest.json",
-    ".next/build-manifest.json",
-    ".next/prerender-manifest.json",
-    ".next/server/functions-config-manifest.json",
-    ".next/server/middleware-manifest.json",
-    ".next/server/middleware-build-manifest.js",
-    ".next/server/app-paths-manifest.json",
-    ".next/app-path-routes-manifest.json",
-    ".next/server/server-reference-manifest.js",
-    ".next/server/server-reference-manifest.json",
-    ".next/server/prefetch-hints.json",
-    ".next/BUILD_ID",
-    ".next/server/next-font-manifest.js",
-    ".next/server/next-font-manifest.json",
-    ".next/required-server-files.json"
+    ".next\\package.json",
+    ".next\\routes-manifest.json",
+    ".next\\server\\pages-manifest.json",
+    ".next\\build-manifest.json",
+    ".next\\prerender-manifest.json",
+    ".next\\server\\functions-config-manifest.json",
+    ".next\\server\\middleware-manifest.json",
+    ".next\\server\\middleware-build-manifest.js",
+    ".next\\server\\app-paths-manifest.json",
+    ".next\\app-path-routes-manifest.json",
+    ".next\\server\\server-reference-manifest.js",
+    ".next\\server\\server-reference-manifest.json",
+    ".next\\server\\prefetch-hints.json",
+    ".next\\BUILD_ID",
+    ".next\\server\\next-font-manifest.js",
+    ".next\\server\\next-font-manifest.json",
+    ".next\\required-server-files.json"
   ],
   "ignore": []
 }

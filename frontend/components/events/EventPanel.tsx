@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import type { WeatherEvent } from '@/types';
 import { severityColor, riskColor } from '@/lib/api';
 
@@ -8,40 +9,48 @@ interface EventPanelProps {
   loading?: boolean;
 }
 
-function DriverRow({ label, value, unit, max = 100, color }: {
-  label: string; value: number; unit: string; max?: number; color: string;
+function DriverRow({
+  label,
+  value,
+  unit,
+  max = 100,
+  color,
+  explanation,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  max?: number;
+  color: string;
+  explanation: string;
 }) {
-  const pct = Math.min(100, Math.abs(value) / max * 100);
+  const pct = Math.min(100, (Math.abs(value) / max) * 100);
   const displayVal = value >= 0 ? `+${value}${unit}` : `${value}${unit}`;
-  return (
-    <div className="py-2 border-b border-outline-variant/30 last:border-0">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="font-sans text-[12px] text-on-surface-variant">{label}</span>
-        <span className="font-mono text-[12px] font-semibold" style={{ color }}>{displayVal}</span>
-      </div>
-      <div className="anomaly-bar-track">
-        <div className="anomaly-bar-fill"
-          style={{ width: `${pct}%`, background: color }} />
-      </div>
-    </div>
-  );
-}
 
-function MetaRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/20 last:border-0">
-      <span className="font-mono text-[10px] font-medium tracking-widest uppercase text-on-surface-variant">{label}</span>
-      <span className="font-mono text-[12px] text-on-surface">{value}</span>
+    <div className="py-2.5 border-b border-slate-800 last:border-0">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs font-semibold text-slate-200">{label}</span>
+        <span className="font-mono text-xs font-bold" style={{ color }}>
+          {displayVal}
+        </span>
+      </div>
+      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-1">
+        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+      </div>
+      <div className="text-[11px] text-slate-400 leading-tight">{explanation}</div>
     </div>
   );
 }
 
 export default function EventPanel({ event, loading }: EventPanelProps) {
+  const [copied, setCopied] = useState(false);
+
   if (loading) {
     return (
-      <div className="flex flex-col h-full p-4 gap-4">
+      <div className="flex flex-col h-full p-4 gap-3">
         {[80, 40, 60, 100, 60].map((w, i) => (
-          <div key={i} className="shimmer rounded h-4" style={{ width: `${w}%` }} />
+          <div key={i} className="bg-slate-800/40 animate-pulse rounded-lg h-10" style={{ width: `${w}%` }} />
         ))}
       </div>
     );
@@ -49,16 +58,13 @@ export default function EventPanel({ event, loading }: EventPanelProps) {
 
   if (!event) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center px-6">
-        <div className="w-12 h-12 rounded-sm flex items-center justify-center mb-4"
-          style={{ background: 'rgba(0,219,233,0.08)', border: '1px solid rgba(0,219,233,0.2)' }}>
-          <span className="material-symbols-outlined text-2xl" style={{ color: '#00dbe9' }}>touch_app</span>
+      <div className="flex flex-col items-center justify-center h-full text-center p-6 text-slate-400">
+        <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-2xl mb-3 text-cyan-400">
+          <i className="bi bi-crosshair text-2xl text-cyan-400"></i>
         </div>
-        <p className="font-mono text-xs text-on-surface-variant tracking-wider uppercase mb-1">
-          Select an Event
-        </p>
-        <p className="font-sans text-[12px] text-on-surface-variant/60">
-          Click on a map marker or list item to view event intelligence
+        <h3 className="font-bold text-sm text-white mb-1">No Event Selected</h3>
+        <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+          Click any event marker on the Google Earth radar map or select from the list to view meteorological drivers and emergency advisories.
         </p>
       </div>
     );
@@ -68,133 +74,208 @@ export default function EventPanel({ event, loading }: EventPanelProps) {
   const rCol = riskColor(event.risk_score);
   const d = event.anomaly_drivers;
 
-  const startDate = new Date(event.start_time);
-  const startStr = startDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const handleCopyReport = () => {
+    const reportText = `[AEROWATCH EMERGENCY BRIEFING]
+Event ID: ${event.event_id}
+Hazard: ${event.hazard_type}
+Severity: ${event.severity} (Risk: ${event.risk_score}/100)
+Location: ${event.location.region_name}
+Affected Area: ${event.affected_area_km2.toLocaleString()} km²
+Districts: ${event.affected_districts.join(', ')}
+Forecast Trajectory: Tracking ${event.movement_direction || 'N'} at ${event.movement_speed_kmh || 10} km/h
+Rainfall Anomaly: ${d.rainfall_anomaly_pct}% departure
+Temperature Deviation: ${d.temperature_anomaly_c}°C
+Barometric Pressure Delta: ${d.pressure_anomaly_hpa} hPa
+Confidence: ${event.confidence}%`;
+
+    navigator.clipboard.writeText(reportText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
+  };
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-outline-variant/30"
-        style={{ background: `linear-gradient(135deg, ${sevColor}08, transparent)` }}>
+    <div className="flex flex-col h-full overflow-y-auto bg-[#0b0e14] divide-y divide-slate-800 text-xs">
+      {/* Header Banner */}
+      <div className="p-4 bg-gradient-to-b from-slate-900 to-transparent">
         <div className="flex items-start justify-between gap-2 mb-2">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-mono text-[10px] font-semibold tracking-widest uppercase px-1.5 py-0.5 rounded-sm"
-                style={{ color: sevColor, background: `${sevColor}15`, border: `1px solid ${sevColor}30` }}>
-                {event.severity}
+              <span
+                className="font-bold text-[10px] px-2 py-0.5 rounded font-mono uppercase"
+                style={{ background: `${sevColor}20`, color: sevColor, border: `1px solid ${sevColor}50` }}
+              >
+                {event.severity} ALERT
               </span>
-              <span className="font-mono text-[10px] text-on-surface-variant">{event.event_id}</span>
+              <span className="font-mono text-slate-400 text-[11px] font-semibold">{event.event_id}</span>
             </div>
-            <div className="font-mono text-sm font-bold text-on-surface">
+            <h2 className="text-base font-bold text-white leading-tight">
               {event.hazard_type.replace(/_/g, ' ')}
-            </div>
-            <div className="font-sans text-[12px] text-on-surface-variant mt-0.5">
-              {event.location.region_name}
+            </h2>
+            <div className="text-slate-400 text-xs mt-0.5 flex items-center gap-1">
+              <i className="bi bi-geo-alt-fill text-slate-500 text-[11px]"></i>
+              <span>{event.location.region_name}</span>
             </div>
           </div>
 
-          {/* Risk gauge */}
-          <div className="flex flex-col items-center flex-shrink-0">
-            <div className="w-12 h-12 rounded-sm flex items-center justify-center relative"
-              style={{ background: `${rCol}12`, border: `1px solid ${rCol}30` }}>
-              <span className="kpi-value text-lg" style={{ color: rCol }}>{event.risk_score}</span>
+          {/* Risk Badge */}
+          <div className="flex flex-col items-center">
+            <div
+              className="w-13 h-13 rounded-xl flex items-center justify-center font-bold text-lg font-mono shadow-lg"
+              style={{ background: `${rCol}20`, color: rCol, border: `1px solid ${rCol}50` }}
+            >
+              {event.risk_score}
             </div>
-            <span className="font-mono text-[9px] text-on-surface-variant mt-1 tracking-wider uppercase">Risk</span>
+            <span className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Risk / 100</span>
           </div>
         </div>
 
-        {/* Confidence bar */}
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] text-on-surface-variant tracking-wider uppercase">
-            Confidence
+        {/* Confidence & Lead Time Strip */}
+        <div className="flex items-center justify-between gap-3 bg-slate-900/80 p-2 rounded-lg border border-slate-800 mt-2">
+          <div>
+            <span className="text-slate-400 text-[11px]">Detection Lead: </span>
+            <span className="font-bold text-cyan-400">{event.forecast_lead_hours} Hours</span>
+          </div>
+          <div>
+            <span className="text-slate-400 text-[11px]">AI Confidence: </span>
+            <span className="font-bold text-emerald-400">{event.confidence}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Executive Summary Briefing */}
+      <div className="p-4 bg-slate-900/40">
+        <div className="font-bold text-white text-xs mb-1.5 flex items-center gap-1.5">
+          <i className="bi bi-clipboard-data text-cyan-400"></i>
+          <span>Executive Briefing</span>
+        </div>
+        <p className="text-slate-300 text-xs leading-relaxed">
+          {event.severity === 'SEVERE' || event.severity === 'HIGH' ? (
+            <>
+              Anomalous weather cluster identified in <strong>{event.location.state}</strong>. Barometric pressure is showing a departure of <strong>{d.pressure_anomaly_hpa} hPa</strong> with severe precipitation departure of <strong>{d.rainfall_anomaly_pct > 0 ? `+${d.rainfall_anomaly_pct}%` : `${d.rainfall_anomaly_pct}%`}</strong>. Expected to persist for ~<strong>{event.expected_duration_hours} hours</strong> with active displacement towards <strong>{event.movement_direction || 'North'}</strong>.
+            </>
+          ) : (
+            <>
+              Moderate meteorological fluctuation observed over <strong>{event.location.state}</strong>. Weather systems are tracking within expected medium-range climatological bounds with <strong>{event.confidence}%</strong> model confidence.
+            </>
+          )}
+        </p>
+      </div>
+
+      {/* Recommended Emergency Actions (NDMA / IMD Protocol) */}
+      <div className="p-4">
+        <div className="font-bold text-white text-xs mb-2 flex items-center gap-1.5">
+          <i className="bi bi-shield-exclamation text-amber-400"></i>
+          <span>Civil Protection Advisory</span>
+        </div>
+        <div className="space-y-2">
+          {event.severity === 'SEVERE' ? (
+            <>
+              <div className="flex items-start gap-2 text-slate-300">
+                <span className="text-red-400 font-bold">1.</span>
+                <span>Immediate coastal/low-lying evacuation for vulnerable settlements in {event.location.district || event.location.state}.</span>
+              </div>
+              <div className="flex items-start gap-2 text-slate-300">
+                <span className="text-red-400 font-bold">2.</span>
+                <span>Pre-position National Disaster Response Force (NDRF) and civil supplies in staging areas.</span>
+              </div>
+              <div className="flex items-start gap-2 text-slate-300">
+                <span className="text-red-400 font-bold">3.</span>
+                <span>Suspend marine fishing operations and issue red warnings to transport corridors.</span>
+              </div>
+            </>
+          ) : event.severity === 'HIGH' ? (
+            <>
+              <div className="flex items-start gap-2 text-slate-300">
+                <span className="text-amber-400 font-bold">1.</span>
+                <span>Alert District Emergency Operations Centers (DEOC) across {event.affected_districts.slice(0, 3).join(', ')}.</span>
+              </div>
+              <div className="flex items-start gap-2 text-slate-300">
+                <span className="text-amber-400 font-bold">2.</span>
+                <span>Clear arterial storm drainage systems and inspect embankment safety.</span>
+              </div>
+            </>
+          ) : (
+            <div className="text-slate-400 text-xs">
+              Standard vigilance protocol active. Maintain monitoring through IMD medium-range forecast intervals.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Meteorological Anomaly Drivers (Explainable AI) */}
+      <div className="p-4">
+        <div className="font-bold text-white text-xs mb-2 flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <i className="bi bi-activity text-cyan-400"></i>
+            <span>Why Was This Event Flagged?</span>
           </span>
-          <div className="flex-1 anomaly-bar-track">
-            <div className="anomaly-bar-fill" style={{ width: `${event.confidence}%`, background: '#00dbe9' }} />
-          </div>
-          <span className="font-mono text-[11px] text-primary-container">{event.confidence}%</span>
+          <span className="text-[10px] text-cyan-400 font-mono">Z-Score & Baselines</span>
         </div>
+
+        <DriverRow
+          label="Precipitation Surplus / Deficit"
+          value={d.rainfall_anomaly_pct}
+          unit="%"
+          max={300}
+          color={d.rainfall_anomaly_pct > 0 ? '#38bdf8' : '#fb923c'}
+          explanation={d.rainfall_anomaly_pct > 50 ? 'Excessive surplus vs 30-year IMD seasonal normal' : 'Moderate rainfall fluctuation'}
+        />
+
+        <DriverRow
+          label="Temperature Deviation"
+          value={d.temperature_anomaly_c}
+          unit="°C"
+          max={8}
+          color={d.temperature_anomaly_c > 0 ? '#f87171' : '#60a5fa'}
+          explanation={d.temperature_anomaly_c > 3 ? 'Substantial thermal departure above climatological average' : 'Near seasonal norm'}
+        />
+
+        <DriverRow
+          label="Wind Velocity Departure"
+          value={d.wind_anomaly_pct}
+          unit="%"
+          max={150}
+          color="#facc15"
+          explanation={d.wind_anomaly_pct > 40 ? 'Gale-force wind speeds accelerating storm propagation' : 'Standard wind currents'}
+        />
+
+        <DriverRow
+          label="Surface Barometric Pressure Delta"
+          value={d.pressure_anomaly_hpa}
+          unit=" hPa"
+          max={25}
+          color={d.pressure_anomaly_hpa < 0 ? '#f87171' : '#2dd4bf'}
+          explanation={d.pressure_anomaly_hpa < -5 ? 'Steep barometric drop indicating deep depression / cyclonic core' : 'Atmospheric pressure stable'}
+        />
       </div>
 
-      {/* Metadata */}
-      <div className="px-4 py-3 border-b border-outline-variant/20">
-        <MetaRow label="Hazard" value={event.hazard_type.replace(/_/g, ' ')} />
-        <MetaRow label="Location" value={`${event.location.state}${event.location.district ? ` — ${event.location.district}` : ''}`} />
-        <MetaRow label="Start" value={startStr} />
-        <MetaRow label="Duration" value={`~${event.expected_duration_hours}h`} />
-        <MetaRow label="Area" value={`${event.affected_area_km2.toLocaleString()} km²`} />
-        <MetaRow label="Districts" value={`${event.affected_districts.length} affected`} />
-        {event.movement_direction && (
-          <MetaRow label="Movement" value={`${event.movement_direction} at ${event.movement_speed_kmh} km/h`} />
-        )}
-        <MetaRow label="Growth" value={`+${event.growth_rate_pct}% / 24h`} />
-        <MetaRow label="Lead Time" value={`${event.forecast_lead_hours}h`} />
-      </div>
-
-      {/* Affected districts */}
-      <div className="px-4 py-3 border-b border-outline-variant/20">
-        <div className="font-mono text-[10px] font-medium tracking-widest uppercase text-on-surface-variant mb-2">
-          Affected Districts
+      {/* Affected Districts */}
+      <div className="p-4">
+        <div className="font-bold text-white text-xs mb-2 flex items-center justify-between">
+          <span>Affected Districts ({event.affected_districts.length})</span>
+          <span className="text-slate-400 font-mono text-[11px]">{event.affected_area_km2.toLocaleString()} km²</span>
         </div>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {event.affected_districts.map(d2 => (
-            <span key={d2} className="font-mono text-[10px] px-1.5 py-0.5 rounded-sm text-on-surface-variant"
-              style={{ background: 'rgba(59,73,75,0.3)', border: '1px solid rgba(59,73,75,0.5)' }}>
+            <span
+              key={d2}
+              className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-200 border border-slate-700 text-[11px]"
+            >
               {d2}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Anomaly drivers */}
-      <div className="px-4 py-3">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="material-symbols-outlined text-[14px]" style={{ color: '#00dbe9' }}>info</span>
-          <span className="font-mono text-[10px] font-medium tracking-widest uppercase text-on-surface-variant">
-            Why Was This Event Flagged?
-          </span>
-        </div>
-        <DriverRow
-          label="Rainfall Anomaly"
-          value={d.rainfall_anomaly_pct}
-          unit="%"
-          max={400}
-          color={d.rainfall_anomaly_pct > 0 ? '#44aaff' : '#ff8800'}
-        />
-        <DriverRow
-          label="Temperature Anomaly"
-          value={d.temperature_anomaly_c}
-          unit="°C"
-          max={10}
-          color={d.temperature_anomaly_c > 0 ? '#ff4444' : '#44aaff'}
-        />
-        <DriverRow
-          label="Wind Anomaly"
-          value={d.wind_anomaly_pct}
-          unit="%"
-          max={200}
-          color="#ffcc00"
-        />
-        <DriverRow
-          label="Pressure Anomaly"
-          value={d.pressure_anomaly_hpa}
-          unit=" hPa"
-          max={30}
-          color={d.pressure_anomaly_hpa < 0 ? '#ff4444' : '#00dbe9'}
-        />
-        <DriverRow
-          label="Persistence"
-          value={d.persistence_days}
-          unit=" days"
-          max={7}
-          color="#d1bcff"
-        />
-        <DriverRow
-          label="Spatial Growth"
-          value={d.spatial_growth_pct}
-          unit="%"
-          max={60}
-          color={sevColor}
-        />
+      {/* Copy / Export Report Action */}
+      <div className="p-4 bg-slate-900/60 flex items-center justify-between">
+        <button
+          onClick={handleCopyReport}
+          className="w-full py-2 px-4 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold border border-cyan-400/40 text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+        >
+          {copied ? <i className="bi bi-check2-circle text-emerald-400 text-sm"></i> : <i className="bi bi-copy text-sm"></i>}
+          <span>{copied ? 'Briefing Copied to Clipboard!' : 'Copy Operational Briefing'}</span>
+        </button>
       </div>
     </div>
   );

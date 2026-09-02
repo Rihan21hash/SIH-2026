@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface ForecastTimelineProps {
   timeStepIndex: number;
@@ -8,105 +8,127 @@ interface ForecastTimelineProps {
 }
 
 const TIMESTEPS = [
-  { label: 'NOW',   hours: 0 },
-  { label: '+12h',  hours: 12 },
-  { label: '+24h',  hours: 24 },
-  { label: '+36h',  hours: 36 },
-  { label: '+48h',  hours: 48 },
-  { label: '+72h',  hours: 72 },
+  { label: 'T0 (Now)', short: 'Now', hours: 0, desc: 'Current Observed Field' },
+  { label: 'T+12h', short: '+12h', hours: 12, desc: '+12h Medium-Range Forecast' },
+  { label: 'T+24h', short: '+24h', hours: 24, desc: '+24h Medium-Range Forecast' },
+  { label: 'T+36h', short: '+36h', hours: 36, desc: '+36h Peak Projection' },
+  { label: 'T+48h', short: '+48h', hours: 48, desc: '+48h Track Decay/Landfall' },
+  { label: 'T+72h', short: '+72h', hours: 72, desc: '+72h Long Range Track' },
 ];
 
 export default function ForecastTimeline({ timeStepIndex, onChange }: ForecastTimelineProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const playRef = useRef<NodeJS.Timeout | null>(null);
+  const playRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const indexRef = useRef(timeStepIndex);
+
+  indexRef.current = timeStepIndex;
+
+  const stopPlayback = useCallback(() => {
+    setIsPlaying(false);
+    if (playRef.current) {
+      clearInterval(playRef.current);
+      playRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     if (isPlaying) {
       playRef.current = setInterval(() => {
-        onChange((timeStepIndex + 1) % TIMESTEPS.length);
-      }, 1200);
+        const nextIndex = indexRef.current + 1;
+        if (nextIndex >= TIMESTEPS.length) {
+          stopPlayback();
+          return;
+        }
+        onChange(nextIndex);
+      }, 1500);
     } else {
-      if (playRef.current) clearInterval(playRef.current);
+      if (playRef.current) {
+        clearInterval(playRef.current);
+        playRef.current = null;
+      }
     }
-    return () => { if (playRef.current) clearInterval(playRef.current); };
-  }, [isPlaying, timeStepIndex, onChange]);
+    return () => {
+      if (playRef.current) {
+        clearInterval(playRef.current);
+        playRef.current = null;
+      }
+    };
+  }, [isPlaying, onChange, stopPlayback]);
 
-  function handlePlay() {
-    if (timeStepIndex === TIMESTEPS.length - 1) onChange(0);
-    setIsPlaying(v => !v);
+  function handlePlayToggle() {
+    if (isPlaying) {
+      stopPlayback();
+      return;
+    }
+    if (timeStepIndex >= TIMESTEPS.length - 1) {
+      onChange(0);
+    }
+    setIsPlaying(true);
   }
 
-  const current = TIMESTEPS[timeStepIndex];
+  const current = TIMESTEPS[timeStepIndex] || TIMESTEPS[0];
 
   return (
-    <div className="flex flex-col gap-2 px-4 py-3">
-      {/* Header row */}
-      <div className="flex items-center justify-between mb-1">
+    <div className="flex flex-col gap-2 px-4 py-2.5 bg-[#0f131d] border-t border-slate-800 text-xs">
+      {/* Header Info */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[16px] text-primary-container">schedule</span>
-          <span className="font-mono text-[11px] font-medium tracking-widest uppercase text-on-surface-variant">
-            Forecast Timeline
+          <i className="bi bi-clock-history text-cyan-400 text-sm"></i>
+          <span className="font-bold text-white tracking-wide text-xs">
+            Medium-Range Forecast Playback (0 to 72h)
+          </span>
+          <span className="text-[11px] text-slate-400 hidden sm:inline">
+            — {current.desc}
           </span>
         </div>
-        <div className="font-mono text-[11px] text-primary-container">
-          T {current.hours === 0 ? '= Now' : `+${current.hours}h`}
+
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-cyan-300 font-bold text-xs bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">
+            Current Timestep: {current.label} ({current.hours === 0 ? 'Live T0' : `+${current.hours} Hours`})
+          </span>
         </div>
       </div>
 
-      {/* Playback controls + scrubber */}
+      {/* Controls and Clickable Steps */}
       <div className="flex items-center gap-3">
-        {/* Controls */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => onChange(Math.max(0, timeStepIndex - 1))}
-            className="w-7 h-7 flex items-center justify-center rounded-sm text-on-surface-variant
-              hover:text-primary-container hover:bg-primary-container/10 transition-all duration-150">
-            <span className="material-symbols-outlined text-[18px]">skip_previous</span>
-          </button>
-          <button
-            onClick={handlePlay}
-            className="w-8 h-8 flex items-center justify-center rounded-sm transition-all duration-150"
-            style={{
-              background: isPlaying ? 'rgba(0,240,255,0.15)' : 'rgba(0,240,255,0.08)',
-              border: '1px solid rgba(0,240,255,0.3)',
-              color: '#00f0ff',
-            }}>
-            <span className="material-symbols-outlined text-[18px]">
-              {isPlaying ? 'pause' : 'play_arrow'}
-            </span>
-          </button>
-          <button
-            onClick={() => onChange(Math.min(TIMESTEPS.length - 1, timeStepIndex + 1))}
-            className="w-7 h-7 flex items-center justify-center rounded-sm text-on-surface-variant
-              hover:text-primary-container hover:bg-primary-container/10 transition-all duration-150">
-            <span className="material-symbols-outlined text-[18px]">skip_next</span>
-          </button>
-        </div>
+        {/* Play/Pause Button */}
+        <button
+          onClick={handlePlayToggle}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer flex-shrink-0 ${
+            isPlaying
+              ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-amber-500/20'
+              : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20'
+          }`}
+          title={isPlaying ? 'Pause trajectory animation' : 'Play 72-hour forecast trajectory animation'}
+        >
+          <i className={isPlaying ? 'bi bi-pause-fill text-sm' : 'bi bi-play-fill text-sm'}></i>
+          <span>{isPlaying ? 'Pause' : 'Play Track'}</span>
+        </button>
 
-        {/* Scrubber */}
-        <div className="flex-1 relative">
-          <input
-            type="range"
-            className="timeline-range w-full"
-            min={0}
-            max={TIMESTEPS.length - 1}
-            value={timeStepIndex}
-            onChange={e => onChange(Number(e.target.value))}
-          />
-          {/* Step labels */}
-          <div className="flex justify-between mt-1.5 pointer-events-none">
-            {TIMESTEPS.map((step, i) => (
-              <div key={step.label} className="flex flex-col items-center"
-                style={{ width: `${100 / TIMESTEPS.length}%` }}>
-                <div className="w-px h-1.5 mb-0.5"
-                  style={{ background: i === timeStepIndex ? '#00f0ff' : '#3b494b' }} />
-                <span className="font-mono text-[9px]"
-                  style={{ color: i === timeStepIndex ? '#00dbe9' : '#849495' }}>
-                  {step.label}
+        {/* Step Buttons */}
+        <div className="flex items-center gap-1.5 flex-1 overflow-x-auto py-0.5">
+          {TIMESTEPS.map((step, idx) => {
+            const isCurrent = idx === timeStepIndex;
+            return (
+              <button
+                key={step.label}
+                onClick={() => {
+                  stopPlayback();
+                  onChange(idx);
+                }}
+                className={`flex-1 min-w-[70px] py-1.5 px-2 rounded-lg text-xs font-semibold flex flex-col items-center transition-all cursor-pointer border ${
+                  isCurrent
+                    ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-md shadow-cyan-500/10'
+                    : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <span className="font-bold">{step.short}</span>
+                <span className="text-[9px] opacity-70 font-mono">
+                  {step.hours === 0 ? 'Now' : `+${step.hours}h`}
                 </span>
-              </div>
-            ))}
-          </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,12 +1,6 @@
 {
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
-  "/api/alerts/route": "/api/alerts",
-  "/api/events/route": "/api/events",
-  "/api/risk/route": "/api/risk",
-  "/dashboard/analysis/page": "/dashboard/analysis",
-  "/dashboard/events/[id]/page": "/dashboard/events/[id]",
-  "/dashboard/page": "/dashboard",
   "/favicon.ico/route": "/favicon.ico",
   "/page": "/"
 }

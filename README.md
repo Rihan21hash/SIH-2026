@@ -1,28 +1,28 @@
-# 🌪️ AeroWatch — AI-Powered Extreme Weather Intelligence & Command Center
+#  AeroWatch — AI-Powered Extreme Weather Intelligence & Command Center
 
 > **SIH26078**: AI-Driven Spatio-Temporal Tracking of Extreme Weather Anomalies in Medium-Range Forecasts  
 > **Product**: AeroWatch Operational Command Center
 
 ---
 
-## 🛰️ Executive Overview
+##  Executive Overview
 
 **AeroWatch** is a next-generation meteorological command-and-control intelligence platform designed to detect, track, and forecast extreme weather anomalies across the Indian subcontinent. Combining explainable statistical anomaly engines, multi-dimensional risk index scoring, and interactive MapLibre spatio-temporal tracking, AeroWatch equips emergency responders and meteorological agencies with early situational awareness.
 
 ---
 
-## ⚡ Key Features
+##  Key Features
 
-- **🗺️ Interactive Spatio-Temporal Radar Map**: High-performance MapLibre GL visualization of India with real-time vector boundaries, multi-tier risk halos, and forecast trajectory tracks (T0 to T+72h).
-- **📊 Real-time Explainable Anomaly Detection**: Z-score calculations across Temperature, Rainfall, Wind Velocity, and Barometric Pressure against IMD climatological baselines.
-- **🛡️ 0–100 Weighted Risk Scoring**: Normalized multi-variate risk index with confidence scoring and severity categorization (LOW, MODERATE, ELEVATED, HIGH, SEVERE).
-- **⏱️ Multi-Interval Forecast Timeline Scrubber**: Scrub across medium-range timesteps (T0, +12h, +24h, +36h, +48h, +72h) with trajectory playback and coordinate interpolation.
-- **🔄 Dual Mode (LIVE / DEMO)**: Operates in **LIVE MODE** via Open-Meteo (₹0 cost, no API keys needed) with automatic graceful fallback to **DEMO MODE** for offline simulations.
-- **🎨 Stitch "AeroDark Intelligence" Design**: Professional command-and-control visual language with CRT scanlines, HUD brackets, and telemetry gauges.
+- ** Interactive Spatio-Temporal Radar Map**: High-performance MapLibre GL visualization of India with real-time vector boundaries, multi-tier risk halos, and forecast trajectory tracks (T0 to T+72h).
+- ** Real-time Explainable Anomaly Detection**: Z-score calculations across Temperature, Rainfall, Wind Velocity, and Barometric Pressure against IMD climatological baselines.
+- ** 0–100 Weighted Risk Scoring**: Normalized multi-variate risk index with confidence scoring and severity categorization (LOW, MODERATE, ELEVATED, HIGH, SEVERE).
+- ** Multi-Interval Forecast Timeline Scrubber**: Scrub across medium-range timesteps (T0, +12h, +24h, +36h, +48h, +72h) with trajectory playback and coordinate interpolation.
+- ** Dual Mode (LIVE / DEMO)**: Operates in **LIVE MODE** via Open-Meteo (₹0 cost, no API keys needed) with automatic graceful fallback to **DEMO MODE** for offline simulations.
+- ** Stitch "AeroDark Intelligence" Design**: Professional command-and-control visual language with CRT scanlines, HUD brackets, and telemetry gauges.
 
 ---
 
-## 🏗️ System Architecture
+##  System Architecture
 
 ```mermaid
 graph TD
@@ -41,7 +41,7 @@ graph TD
 
 ---
 
-## 🚀 Quick Start Guide
+##  Quick Start Guide
 
 ### Prerequisites
 - **Node.js**: v18.0 or higher
@@ -83,7 +83,7 @@ Open your browser at **[http://localhost:3000](http://localhost:3000)**.
 
 ---
 
-## 📡 API Endpoints Reference
+##  API Endpoints Reference
 
 | Endpoint | Method | Description |
 |---|---|---|
@@ -96,7 +96,7 @@ Open your browser at **[http://localhost:3000](http://localhost:3000)**.
 
 ---
 
-## 🧮 Mathematical & ML Methodology
+##  Mathematical & ML Methodology
 
 ### 1. Statistical Anomaly Z-Score
 For meteorological variable $x$ observed at station $s$:
@@ -115,7 +115,7 @@ Where weights $w$ are configured in `backend/config.py`:
 
 ---
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 AeroWatch/
